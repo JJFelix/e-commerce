@@ -2,18 +2,22 @@ import express from 'express'
 import dotenv from 'dotenv'
 import mongoose from 'mongoose'
 import authRouter from './routes/authRoute.js'
+import productRouter from './routes/productRoute.js'
 import { notFound, errorHandler } from './middlewares/errorHandler.js'
 import cookieParser from 'cookie-parser'
+import morgan from 'morgan'
 
 dotenv.config()
 const app = express()
 
 // middleware
+app.use(morgan('combined'))
 app.use(express.json())
 app.use(cookieParser())
  
 // routes
-app.use('/api/users',authRouter)
+app.use('/api/users', authRouter)
+app.use('/api/products', productRouter)
 
 // custom middlewares
 app.use(notFound)

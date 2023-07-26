@@ -92,9 +92,35 @@ export const handleRefreshToken = async (req, res, next)=>{
             throw new Error('There is something wrong with refresh token')
         }
         const accessToken = generateToken(user._id)
+        console.log(refreshToken);
         return res.status(200).json(accessToken)
     })
-    return res.status(200).json({user})
+    // return res.status(200).json({user})
+}
+
+export const logout = async (req, res, next)=>{
+    const cookie = req.cookies
+    if(!cookie?.refreshToken){
+        console.log("No refresh token found in cookies")
+    }
+    const refreshToken = cookie.refreshToken
+    const user = await User.findOne({ refreshToken })
+    if(!user){
+        res.clearCookie('refreshToken', {
+            httpOnly:true,
+            secure:true
+        })
+        return res.sendStatus(204)
+    }
+    await User.findOneAndUpdate(
+        {refreshToken:refreshToken}, 
+        {refreshToken:""}
+    )
+    res.clearCookie("refreshToken", {
+        httpOnly:true,
+        secure:true
+    })
+    return res.sendStatus(204)
 }
 
 export const getUsers = async (req, res, next)=>{
