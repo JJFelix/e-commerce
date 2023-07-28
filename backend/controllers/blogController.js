@@ -31,17 +31,18 @@ export const getBlog = async (req, res, next)=>{
     const { id } = req.params
     validateMongoDBId(id)
     try {
+        const _blog = await Blog.findById(id).populate("likes").populate("dislikes")
         const blog = await Blog.findByIdAndUpdate(
             id,
             { $inc:{numViews:1} },
             { new:true }
-        ) 
+        ).populate('likes', "likes ")
         if(!blog){
             console.log('Blog not found')
             return res.status(404).json({message:"Blog not found"})
         }
         console.log('Blog retrieved successfully')
-        return res.status(200).json({message: `Blog ${id} retrieved successfully`, blog})
+        return res.status(200).json({message: `Blog ${id} retrieved successfully`, blog,_blog})
     } catch (err) {
         console.error("Unexpected error occurred", err);        
         return res.status(500).json({err})    

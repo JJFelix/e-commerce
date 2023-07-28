@@ -1,5 +1,7 @@
 import { query } from "express"
 import Product from "../models/Product.js"
+import User from '../models/User.js'
+
 import slugify from "slugify"
 
 export const addProduct = async (req, res, next)=>{
@@ -126,5 +128,36 @@ export const deleteProduct = async (req, res, next)=>{
     } catch (err) {
         console.error(err);        
         return res.status(500).json("Uexpected error occurred")       
+    }
+}
+
+export const addToWishlist = async (req, res, next)=>{
+    const { id } = req.user
+    const { prodId } = req.body
+    try {
+        const user = await User.findById(id)
+        const alreadyAdded = user.wishlist.find( (id) => id.toString() == prodId )
+
+        if(alreadyAdded){
+            await User.findByIdAndUpdate(id, {
+                $pull: {wishlist: prodId}}, {new:true}
+            )
+
+            let updatedWishlist = await User.findById(id)
+
+            console.log("Product removed from wishlist")
+            return res.status(200).json({message:"Product removed from wishlist", updatedWishlist})
+        }else{
+            await User.findByIdAndUpdate(id, {
+                $push: {wishlist: prodId}}, {new:true}
+            )
+            let updatedWishlist = await User.findById(id)
+            console.log("Product added to wishlist")
+            return res.status(200).json({message:"Product added to wishlist", updatedWishlist})
+        }
+        
+    } catch (err) {
+        console.error(err);        
+        return res.status(500).json("Uexpected error occurred")
     }
 }

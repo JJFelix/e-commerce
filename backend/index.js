@@ -4,9 +4,14 @@ import mongoose from 'mongoose'
 import authRouter from './routes/authRoute.js'
 import productRouter from './routes/productRoute.js'
 import blogRouter from './routes/blogRoute.js'
+import productCategoryRouter from './routes/productCategoryRoute.js'
+import blogCategoryRouter from './routes/blogCategoryRoute.js'
+import  brandRouter from './routes/brandRoute.js'
+
 import { notFound, errorHandler } from './middlewares/errorHandler.js'
 import cookieParser from 'cookie-parser'
 import morgan from 'morgan'
+
 
 
 dotenv.config()
@@ -21,7 +26,9 @@ app.use(cookieParser())
 app.use('/api/users', authRouter)
 app.use('/api/products', productRouter)
 app.use('/api/blogs', blogRouter)
-
+app.use('/api/productCategory', productCategoryRouter)
+app.use('/api/blogCategory', blogCategoryRouter)
+app.use('/api/brand', brandRouter)
 // custom middlewares
 app.use(notFound)
 app.use(errorHandler)
