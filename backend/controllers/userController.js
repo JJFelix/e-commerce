@@ -4,6 +4,9 @@ import generateToken from "../config/jwToken.js"
 import { validateMongoDBId } from "../utils/validateMongoDB.js"
 import generateRefreshToken from '../config/refreshToken.js'
 import jwt, { decode } from 'jsonwebtoken'
+import crypto from 'crypto'
+import { sendEmail } from "./emailController.js"
+
 
 export const register = async (req,res, next) => {
     const { name, email, mobile, password }  = req.body
@@ -73,6 +76,113 @@ export const login = async (req, res, next) =>{
     } catch (err) {
         console.error("Unexpected error occurred", err);        
         return res.status(500).json({err})
+    }
+}
+
+export const resetPasswordToken = async (req, res, next)=>{
+    const { id } = req.user
+    const { password } = req.body
+    // console.log(id, password)
+
+    const resetToken = crypto.randomBytes(32).toString('hex')
+    const passwordResetToken = crypto.createHash("sha256").update(resetToken).digest('hex')
+    const passwordResetExpires = Date.now() + 30 * 60 * 1000 //ten minutes
+
+    try {
+    validateMongoDBId(id)
+    const user = await User.findById(id)
+    // console.log(user)
+
+    if(!user){
+        console.log("User not found")
+        return res.status(404).json({message:"User not found"})
+    }else{
+        if (password){
+            const hashedPassword = await bcrypt.hash(password, 10)
+            user.password = hashedPassword            
+            user.passwordResetToken = passwordResetToken
+            user.passwordResetExpires = passwordResetExpires
+            const updatedUser = await user.save()
+            console.log(updateUser)
+            return res.status(200).json(updatedUser)
+        }else{
+            return res.status(200).json(user)
+        }
+    }        
+    } catch (err) {
+        console.error("Unexpected error occurred", err);        
+        return res.status(500).json({err})      
+    } 
+}
+
+export const forgotPasswordToken = async (req, res, next) =>{
+    // console.log(req.user)
+    const { email } = req.user
+
+    const resetToken = crypto.randomBytes(32).toString('hex')
+    const passwordResetToken = crypto.createHash("sha256").update(resetToken).digest('hex')
+    const passwordResetExpires = Date.now() + 30 * 60 * 1000 //ten minutes
+
+    try {
+        const user = await User.findOne({email})
+        if(!user){
+            console.log("User not found")
+            return res.status(404).json({message:"User not found"})
+        }
+
+        const token = resetToken
+        user.passwordResetToken = passwordResetToken
+        user.passwordResetExpires = passwordResetExpires
+
+        await user.save()
+        // console.log(user)
+
+        const resetURL = `Click <a href="http://localhost:6000/api/users/resetPassword/${token}">here</a> to reset your password. Valid for 30 minutes from now.`
+        const data = {
+            to:email,
+            subject:"Password reset",
+            text:"You made a request to reset your password",
+            htm:resetURL
+        }
+
+        sendEmail(data)
+
+        return res.status(200).json(token)
+
+    } catch (err) {
+        console.error("Unexpected error occurred", err);        
+        return res.status(500).json({err})  
+    } 
+}
+
+export const resetPassword = async (req, res, next)=>{
+    console.log("hello reset password")
+
+    const { password } = req.body
+    const { token } = req.params
+    const hashedToken = crypto.createHash('sha256').update(token).digest('hex')
+
+    try {
+        const user = await User.findOne({ 
+            passwordResetToken: hashedToken,
+            passwordResetExpires: {$gt:Date.now()}
+        })
+
+        if(!user){
+            console.log("Token expired. Please click on forgot password again")
+            return res.status(404).json({message:"Token expired. Please click on forgot password again"})
+        }
+        const hashedPassword = await bcrypt.hash(password, 10)
+        user.password = hashedPassword
+        user.passwordResetToken = undefined
+        user.passwordResetExpires=undefined
+
+        await user.save()
+        console.log("Password reset successfully")
+        return res.status(200).json({message:"Password reset successful", user})
+    } catch (err) {
+        console.error("Unexpected error occurred", err);        
+        return res.status(500).json({err})          
     }
 }
 
