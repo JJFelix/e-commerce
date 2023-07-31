@@ -1,9 +1,10 @@
 import express from 'express'
 import { 
     createBlog, deleteBlog, dislikeBlog, getBlog, 
-    getBlogs, likeBlog, updateBlog 
+    getBlogs, likeBlog, updateBlog, uploadImages 
 } from '../controllers/blogController.js'
 import { authMiddleware, isAdmin } from '../middlewares/authMiddleware.js'
+import { blogImgResize, uploadPhoto } from '../middlewares/uploadImages.js'
 
 const blogRouter = express.Router()
 
@@ -18,7 +19,8 @@ blogRouter.get('/:id', getBlog)
 blogRouter.put('/update/:id', authMiddleware, isAdmin, updateBlog)
 blogRouter.put('/likeBlog', authMiddleware, likeBlog)
 blogRouter.put('/dislikeBlog', authMiddleware, dislikeBlog)
-
+blogRouter.put('/upload/:id', authMiddleware, isAdmin, 
+    uploadPhoto.array('images',3), blogImgResize, uploadImages)
 
 // D
 blogRouter.delete('/delete/:id', authMiddleware, isAdmin, deleteBlog)

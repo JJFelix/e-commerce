@@ -1,6 +1,7 @@
 import Blog from "../models/Blog.js"
-import User from '../models/User.js'
 import {validateMongoDBId} from '../utils/validateMongoDB.js'
+import { cloudinaryUploadImg } from '../utils/cloudinary.js'
+import fs from 'fs'
 
 export const createBlog = async (req, res, next)=>{
     try {
@@ -154,5 +155,30 @@ export const dislikeBlog = async (req, res, next)=>{
         )
         console.log("Disliked")
         return res.status(200).json(blog)
+    }
+}
+
+export const uploadImages = async (req, res, next)=>{
+    const {id} = req.params
+    validateMongoDBId(id)
+    try {
+        const uploader = (path) => cloudinaryUploadImg(path, "images")   
+        const urls = []
+        const files = req.files
+        for (const file of files){
+            const { path } = file
+            const newPath = await uploader(path)
+            urls.push(newPath)
+            fs.unlinkSync(path)
+        }
+        const findBlog = await Blog.findByIdAndUpdate(id,
+            { image: urls },
+            { new:true }
+        )
+        console.log("Images uploaded")
+        return res.status(200).json({message:"Images uploaded", findBlog})
+    } catch (err) {
+        console.log("Unexpected error occurred", err)
+        return res.status(500).json({message:"Unexpected error occurred.", err})
     }
 }

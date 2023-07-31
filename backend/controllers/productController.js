@@ -1,9 +1,9 @@
-import { query } from "express"
 import Product from "../models/Product.js"
 import User from '../models/User.js'
-
 import slugify from "slugify"
-import { get } from "mongoose"
+import fs from 'fs'
+import { validateMongoDBId } from '../utils/validateMongoDB.js'
+import { cloudinaryUploadImg } from '../utils/cloudinary.js'
 
 export const addProduct = async (req, res, next)=>{
     try {
@@ -216,13 +216,26 @@ export const rating = async (req, res, next)=>{
 }
 
 export const uploadImages = async (req, res, next)=>{
-    console.log("Uploading images")
-    console.log(req.files)
-
-    // try {
-        
-    // } catch (err) {
-    //     console.log("Unexpected error occurred")
-    //     return res.status(500).json("Unexpected error occurred")
-    // }
+    const {id} = req.params
+    validateMongoDBId(id)
+    try {
+        const uploader = (path) => cloudinaryUploadImg(path, "images")   
+        const urls = []
+        const files = req.files
+        for (const file of files){
+            const { path } = file
+            const newPath = await uploader(path)
+            urls.push(newPath)
+            fs.unlinkSync(path)
+        }
+        const findProduct = await Product.findByIdAndUpdate(id,
+            { images: urls },
+            { new:true }
+        )
+        console.log("Images uploaded")
+        return res.status(200).json({message:"Images uploaded", findProduct})
+    } catch (err) {
+        console.log("Unexpected error occurred", err)
+        return res.status(500).json({message:"Unexpected error occurred.", err})
+    }
 }
