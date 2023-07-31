@@ -3,6 +3,7 @@ import Product from "../models/Product.js"
 import User from '../models/User.js'
 
 import slugify from "slugify"
+import { get } from "mongoose"
 
 export const addProduct = async (req, res, next)=>{
     try {
@@ -159,5 +160,57 @@ export const addToWishlist = async (req, res, next)=>{
     } catch (err) {
         console.error(err);        
         return res.status(500).json("Uexpected error occurred")
+    }
+}
+
+export const rating = async (req, res, next)=>{
+    const {id} = req.user
+    const {star, comment, prodId} = req.body
+    try {
+        const product = await Product.findById(prodId)
+        let alreadyRated = product.ratings.find((userId) => userId.postedBy.toString() === id.toString())
+        if(alreadyRated){
+            await Product.updateOne(
+                {ratings: { $elemMatch: alreadyRated}},
+                {$set: {
+                    "ratings.$.star":star,
+                    "ratings.$.comment":comment
+                }},
+                {new:true}
+            )  
+            console.log("Product rating updated")   
+            // return res.status(200).json({message:"Product rating updated"})
+        }else{
+            await Product.findByIdAndUpdate(
+                prodId, {
+                    $push:{
+                        ratings:{
+                            star: star,
+                            comment:comment,
+                            postedBy: id
+                        }
+                    }
+                }
+            )
+            console.log("Product rated")
+            // return res.status(200).json(({message: "Product rated"}))
+        }
+
+        const getAllRatings = await Product.findById(prodId)
+        let totalRatings = getAllRatings.ratings.length
+        let ratingSum = getAllRatings.ratings
+        .map((item) => item.star)
+        .reduce((prev, curr) => prev + curr, 0)
+        console.log(`Total ratings: ${totalRatings}, Rating sum: ${ratingSum}`);
+
+        let actualRating = (ratingSum / totalRatings).toFixed(1)
+        let finalProduct = await Product.findByIdAndUpdate( prodId, 
+            { totalRatings: actualRating }, 
+            { new:true  }
+        )
+        return res.status(200).json({message: "Product rating complete", finalProduct})
+    } catch (err) {
+        console.log("Unexpected error occurred")
+        return res.status(500).json("Unexpected error occurred")
     }
 }

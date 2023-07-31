@@ -1,7 +1,7 @@
 import express from 'express'
 import { 
     addProduct, addToWishlist, deleteProduct, 
-    getProduct, getProducts, updateProduct 
+    getProduct, getProducts, rating, updateProduct 
 } from '../controllers/productController.js'
 import { authMiddleware, isAdmin } from '../middlewares/authMiddleware.js'
 
@@ -17,6 +17,7 @@ productRouter.get('/:id', getProduct )
 // U
 productRouter.put('/update/:id', authMiddleware, isAdmin, updateProduct)
 productRouter.put('/wishlist', authMiddleware, addToWishlist)
+productRouter.put('/rating', authMiddleware, rating)
 // D
 productRouter.delete('/delete/:id', authMiddleware, isAdmin, deleteProduct)
 

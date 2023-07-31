@@ -6,6 +6,7 @@ import productRouter from './routes/productRoute.js'
 import blogRouter from './routes/blogRoute.js'
 import productCategoryRouter from './routes/productCategoryRoute.js'
 import blogCategoryRouter from './routes/blogCategoryRoute.js'
+import couponRouter from './routes/couponRoute.js'
 import  brandRouter from './routes/brandRoute.js'
 
 import { notFound, errorHandler } from './middlewares/errorHandler.js'
@@ -29,6 +30,7 @@ app.use('/api/blogs', blogRouter)
 app.use('/api/productCategory', productCategoryRouter)
 app.use('/api/blogCategory', blogCategoryRouter)
 app.use('/api/brand', brandRouter)
+app.use('/api/coupon', couponRouter)
 // custom middlewares
 app.use(notFound)
 app.use(errorHandler)
