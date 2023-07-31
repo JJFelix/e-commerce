@@ -1,9 +1,11 @@
 import express from 'express'
 import { 
     addProduct, addToWishlist, deleteProduct, 
-    getProduct, getProducts, rating, updateProduct 
+    getProduct, getProducts, rating, updateProduct, uploadImages 
 } from '../controllers/productController.js'
 import { authMiddleware, isAdmin } from '../middlewares/authMiddleware.js'
+import { productImgResize, uploadPhoto } from '../middlewares/uploadImages.js'
+
 
 const productRouter = express.Router()
 
@@ -18,6 +20,8 @@ productRouter.get('/:id', getProduct )
 productRouter.put('/update/:id', authMiddleware, isAdmin, updateProduct)
 productRouter.put('/wishlist', authMiddleware, addToWishlist)
 productRouter.put('/rating', authMiddleware, rating)
+productRouter.put('/upload/:id', authMiddleware, isAdmin, 
+    uploadPhoto.array('images',10), productImgResize, uploadImages)
 // D
 productRouter.delete('/delete/:id', authMiddleware, isAdmin, deleteProduct)
 

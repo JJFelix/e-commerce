@@ -214,3 +214,15 @@ export const rating = async (req, res, next)=>{
         return res.status(500).json("Unexpected error occurred")
     }
 }
+
+export const uploadImages = async (req, res, next)=>{
+    console.log("Uploading images")
+    console.log(req.files)
+
+    // try {
+        
+    // } catch (err) {
+    //     console.log("Unexpected error occurred")
+    //     return res.status(500).json("Unexpected error occurred")
+    // }
+}
