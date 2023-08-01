@@ -2,6 +2,7 @@
   margin:0;
   padding: 0;
   box-sizing: border-box;
+  /* color: #ffffff; */
 }
 :root{
   --color-131921:#131921;
@@ -97,5 +98,22 @@ a{
   background-color: transparent;
   color: var(--color-febd69) !important;
 }
-
 /* Header end */
+
+/* footer */
+
+footer{
+  background-color: var(--color-232f3e);
+}
+
+footer:not(:first-child){
+  border-top: 1px solid var(--color-3b4149);
+}
+
+footer .input-group-text{
+  background-color: var(--color-232f3e);
+  color: white;
+  padding: 5px 12px;
+}
+
+/* footer end */
