@@ -10,11 +10,11 @@ const orderSchema = new mongoose.Schema({
             color:String
         }
     ],
-    paymentIntent:{},
+    paymentMethod:{},
     orderStatus:{
         type:String,
         default:"Not Processed",
-        enum:["Not Processed", "Processing", "Cancelled", "Dispatched", "Delivered"]
+        enum:["Not Processed", "Processing", "Cancelled", "Dispatched", "Cash on Delivery", "Delivered"]
     },
     orderBy:{
         type:mongoose.Schema.Types.ObjectId,

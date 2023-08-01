@@ -2,6 +2,7 @@ import User from "../models/User.js"
 import Product from '../models/Product.js'
 import Cart from "../models/Cart.js"
 import Coupon from '../models/Coupon.js'
+import Order from '../models/Order.js'
 import bcrypt from 'bcryptjs'
 import generateToken from "../config/jwToken.js"
 import { validateMongoDBId } from "../utils/validateMongoDB.js"
@@ -9,7 +10,7 @@ import generateRefreshToken from '../config/refreshToken.js'
 import jwt, { decode } from 'jsonwebtoken'
 import crypto from 'crypto'
 import { sendEmail } from "./emailController.js"
-
+import uniqid from 'uniqid'
 
 export const register = async (req,res, next) => {
     const { name, email, mobile, password }  = req.body
@@ -404,7 +405,9 @@ export const userCart = async(req, res, next)=>{
         const user = await User.findById(id)
         const cartExists = await Cart.findOne({ orderBy:user._id })  
         if(cartExists){
-            cartExists.remove()        
+            // cartExists.remove() 
+            console.log("Cart exists already..maybe update?"); 
+            return res.status(200).json({message:"Cart exists"})
         }          
         for (let i=0; i<cart.length; i++){
             let object = {}
@@ -485,5 +488,92 @@ export const applyCoupon = async (req, res, next)=>{
     } catch (err) {
         console.error(err)
         return res.status(500).json({message:"Unexpected error occurred",err})        
+    }
+}
+
+export const createOrder = async (req, res, next)=>{
+    const {id} = req.user
+    validateMongoDBId(id)
+    const {COD, couponApplied} = req.body
+    try {
+        if(!COD){
+            console.log("Create CashOrder field")
+            return res.status(500).json({message:"Create CashOrder field"})
+        }
+        // const user = await User.findById(id)
+        let userCart = await Cart.findOne({orderBy:id})
+        // console.log(userCart.products[0].product)
+        // console.log(await Product.findById(userCart.products[0].product))
+        let finalAmout = 0
+        if(couponApplied && userCart.totalAfterDiscount){
+            finalAmout = userCart.totalAfterDiscount
+        }else{
+            finalAmout = userCart.cartTotal
+        }
+
+        let newOrder = await Order({
+            products: userCart.products,
+            paymentMethod:{
+                id:uniqid(), method:"COD", amount:finalAmout,
+                status:"Cash on Delivery", created: Date.now(), currency: "USD"
+            },
+            orderBy:id,
+            orderStatus:"Cash on Delivery"
+        })
+        await newOrder.save()
+
+        let updateStock = userCart.products.map((item)=>{
+            return {
+                updateOne:{
+                    filter:{ _id: item.product._id },
+                    update:{ $inc: { quantity: -item.count, sold: +item.count } }
+                }
+            }
+        })
+
+        await Product.bulkWrite(updateStock, {})
+        
+        console.log("Order processed")
+        return res.status(200).json({message:"Order processed"})
+    } catch (err) {
+        console.error(err)
+        return res.status(500).json({message:"Unexpected error occurred",err})        
+    }
+}
+
+export const getOrders = async (req, res, next)=>{
+    const {id}= req.user
+    validateMongoDBId(id)
+
+    try {
+        const order = await Order.findOne({orderBy:id}).populate("products.product")        
+        console.log("Order retrieved")
+        return res.status(200).json({message:"Order retrieved", order})
+    } catch (err) {
+        console.error(err)
+        return res.status(500).json({message:"Unexpected error occurred", err})
+    }
+}
+
+export const updateOrderStatus = async (req, res, next)=>{
+    const {id}= req.params // order id
+    validateMongoDBId(id)
+    const {status} = req.body
+    
+    try {
+        const order = await Order.findByIdAndUpdate(id,
+            {
+                orderStatus:status,
+                paymentMethod:{
+                    status:status
+                }
+            },
+            {new:true}
+        )
+        console.error("Order status updated")
+        return res.status(200).json({message:"Order status updated", order})
+    } catch (err) {
+        console.error(err)
+        return res.status(500).json({message:"Unexpected error occurred", err})
     }
 }

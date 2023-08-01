@@ -34,8 +34,7 @@ const productSchema = new mongoose.Schema({
     },
     sold:{
         type:Number,
-        default:0,
-        // select:false
+        required:true,
     },
     images:[],
     color:{
