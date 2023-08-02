@@ -5,18 +5,34 @@ import { BsSearch } from 'react-icons/bs'
 const Header = () => {
   return (
     <>
-      <header className="header-top-strip py-3">
+      <header className="header-bottom py-3">
         <div className="container">
-          <div className="row">
-            <div className="col-6">
-              <p className='text-white mb-0'>
-                Free Shipping and return for goods over $100
-              </p>
-            </div>
-            <div className="col-6">
-              <p className='text-end text-white mb-0'>
-                Call: <a className='text-white' href="tel:+254111914040">+254 111 914 040</a>
-              </p>
+          <div className="row m-auto">
+            <div className="col-12">
+              <div className="menu-bottom d-flex align-items-center gap-30">
+                <div>
+                  <div className="dropdown">
+                  {/* <img src="/images/menu.svg" alt="menu" /> */}
+                    <button className="btn btn-secondary dropdown-toggle bg-transparent border-0 d-flex align-items-center gap-10" type="button" id="dropdownMenuButton1" data-bs-toggle="dropdown" aria-expanded="false">
+                    <img src="/images/menu.svg" alt="menu" />
+                      <span className='me-1 d-inline-block'>Shop Categories</span>
+                    </button>
+                    <ul className="dropdown-menu" aria-labelledby="dropdownMenuButton1">
+                      <li><Link className="dropdown-item text-white" to="#">Action</Link></li>
+                      <li><Link className="dropdown-item text-white" to="#">Another action</Link></li>
+                      <li><Link className="dropdown-item text-white" to="#">Something else here</Link></li>
+                    </ul>
+                  </div>
+                </div>
+                <div className='menu-links'>
+                  <div className="d-flex align-items-center gap-15">
+                    <NavLink to="/">Home</NavLink>
+                    <NavLink to="/store">Our Store</NavLink>
+                    <NavLink to="/blogs">Blogs</NavLink>
+                    <NavLink to="/contact">Contact</NavLink>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
         </div>
@@ -73,36 +89,20 @@ const Header = () => {
             </div>
           </div>
         </div>
-      </header>
+      </header>     
 
-      <header className="header-bottom py-3">
+      <header className="header-top-strip py-2">
         <div className="container">
-          <div className="row m-auto">
-            <div className="col-12">
-              <div className="menu-bottom d-flex align-items-center gap-30">
-                <div>
-                  <div className="dropdown">
-                  {/* <img src="/images/menu.svg" alt="menu" /> */}
-                    <button className="btn btn-secondary dropdown-toggle bg-transparent border-0 d-flex align-items-center gap-10" type="button" id="dropdownMenuButton1" data-bs-toggle="dropdown" aria-expanded="false">
-                    <img src="/images/menu.svg" alt="menu" />
-                      <span className='me-1 d-inline-block'>Shop Categories</span>
-                    </button>
-                    <ul className="dropdown-menu" aria-labelledby="dropdownMenuButton1">
-                      <li><Link className="dropdown-item text-white" to="#">Action</Link></li>
-                      <li><Link className="dropdown-item text-white" to="#">Another action</Link></li>
-                      <li><Link className="dropdown-item text-white" to="#">Something else here</Link></li>
-                    </ul>
-                  </div>
-                </div>
-                <div className='menu-links'>
-                  <div className="d-flex align-items-center gap-15">
-                    <NavLink to="/">Home</NavLink>
-                    <NavLink to="/store">Our Store</NavLink>
-                    <NavLink to="/blogs">Blogs</NavLink>
-                    <NavLink to="/contact">Contact</NavLink>
-                  </div>
-                </div>
-              </div>
+          <div className="row">
+            <div className="col-6">
+              <p className='text-white mb-0'>
+                Free Shipping and return for goods over $100
+              </p>
+            </div>
+            <div className="col-6">
+              <p className='text-end text-white mb-0'>
+                Call: <a className='text-white' href="tel:+254111914040">+254 111 914 040</a>
+              </p>
             </div>
           </div>
         </div>
