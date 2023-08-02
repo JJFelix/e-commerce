@@ -45,10 +45,10 @@ const Footer = () => {
                 <a className="text-white mt-2 d-block mb-2" href="mailto:techlab@ecommerce.com">Email: techlab@ecommerce.com</a>
               </div>
               <div className='social_icons d-flex align-items-center gap-30 mt-4'>
-                <a href=""><BsGithub className='text-white fs-4' /></a>
-                <a href=""><BsInstagram className='text-white fs-4' /></a>
-                <a href=""><BsYoutube className='text-white fs-4' /></a>
-                <a href=""><BsLinkedin className='text-white fs-4' /></a>
+                <Link to="https:github.com/JJFelix" target='blank'><BsGithub className='text-white fs-4' /></Link>
+                <Link to="https:instagram.com" target='blank'><BsInstagram className='text-white fs-4' /></Link>
+                <Link to="https://www.youtube.com/@techandgaming17" target='blank'><BsYoutube className='text-white fs-4' /></Link>
+                <Link to="https://www.linkedin.com/in/felix-masese-profile/" target='blank'><BsLinkedin className='text-white fs-4' /></Link>
               </div>
             </div>
             <div className="col-3">
